@@ -1,0 +1,60 @@
+version: '3'
+services:
+ # webは、コンテナの名前の定義であり、更にその１つ下の階層が、実行するコンテナの定義です
+ web:
+  build:
+    context: .
+    dockerfile: ./docker/nginx/Dockerfile
+  # imageは、イメージ作成時にベースにするDockerイメージ :1.15.6で、Dockerイメージのバージョンを指定しています。
+  # image: nginx:1.15.6
+  # portsは、ポートフォワーディングの指定で、ホスト側のポート:コンテナ側のポートの形式で記述します。ここでは、'8000:80'と記述しているので
+  # ホスト側からlocalhost:8000にアクセスすると、コンテナ側のlocalhost（80はhttpのデフォルトポート）にアクセスできるようになります。
+  ports:
+    - "8000:80"
+  # depends_onは依存関係を定義するオプションです。今回の場合、NginxがPHPを実行するため、NginxがPHPに依存していることを定義しています。
+  # 依存関係を定義すると、docker-composeがそれに従ってDockerコンテナを起動するようになります。
+  depends_on:
+    - app
+  # volumesは、ホスト・コンテナ間でのファイル共有の指定で、ホスト側のパス:コンテナ側のパスの形式で記述します。
+  # ここでは、ホスト側で編集した./docker/nginx/default.confがコンテナ側の/etc/nginx/conf.d/default.confに反映され、さらに、ホスト側のルートディレクトリ（ここでは、作成したディレクトリ./docker-compose-laravel）の内容がホスト側の/var/www/htmlに反映されます。
+  # volumesを設定することファイルやディレクトリは、永続化（コンテナを削除してもホスト側にファイルやディレクトリが残る）させることができます。
+  volumes:
+    - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    - .:/var/www/html
+
+ app: 
+  build:
+    context: .
+    dockerfile: ./docker/php/Dockerfile
+  depends_on: 
+  - db
+  # volumesも設定し、/var/www/html配下のファイルやディレクトリを永続化させます。
+  volumes:
+    - .:/var/www/html
+  # これで、このdocker-compose.ymlはWebサーバーを立ち上げるコンテナと
+  # PHPを動作させるコンテナの2つのコンテナを定義していることになります。
+
+ db:
+  build:
+    context: .
+    dockerfile: ./docker/mysql/Dockerfile
+  # image: mysql:5.7
+  platform: linux/x86_64 # M1チップ対応のため追記
+  # environmentでは、MySQLコンテナでの環境変数を設定しています。
+  environment:
+    # # MYSQL_DATABASEはイメージの起動時に作成するデータベースの名前
+    MYSQL_DATABASE: ${DB_DATABASE}
+    # MYSQL_USER, MYSQL_PASSWORDは新規ユーザーの作成とそのユーザーのパスワードの設定
+    MYSQL_USER: ${DB_USERNAME}
+    MYSQL_PASSWORD: ${DB_PASSWORD}
+    # MYSQL_ROOT_PASSWORDはMySQLにおけるルートユーザーであるrootアカウントのパスワードの設定
+    MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    TZ: 'Asia/Tokyo'
+    
+  ports:
+    - "3306:3306"
+  volumes:
+    - mysql-data:/var/lib/mysql
+volumes: # 追加
+ mysql-data:
+
