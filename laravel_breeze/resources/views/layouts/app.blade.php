@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        {{--  @vite(['resources/css/app.css', 'resources/js/app.js'])  --}}
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     </head>
     <body class="font-sans antialiased">
@@ -20,9 +20,6 @@
 
             <!-- Page Heading -->
             <header class="bg-white shadow">
-                <x-guest-layout>
-                    <p class="text-red-500">テスト</p>
-                </x-guest-layout>
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
