@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\Owner; // Eloquent エロクアント
+use Illuminate\Support\Facades\DB; // QueryBuilder クエリービルダー
+
+use Carbon\Carbon;
+
 class OwnersController extends Controller
 {
     /**
@@ -23,8 +28,26 @@ class OwnersController extends Controller
 
     public function index()
     {
-        //
-        dd('オーナー一覧です。');
+        $date_now = Carbon::now();
+        $date_parse = Carbon::parse(now());
+        echo $date_now->year;
+
+        echo $date_parse;
+        // Eloquent手法での取得 モデルのインスタンスから取得
+        $e_all = Owner::all();
+        // queryBuilder手法での取得 get()
+        $q_get = DB::table('owners')->select('name', 'created_at')->get();
+        // // queryBuilder手法での取得 first()
+        // $q_first = DB::table('owners')->select('name')->first();
+        // // collection型での取得方法
+        // $c_test = collect([
+        //     'name ' => 'テスト'
+        // ]);
+        // var_dump($q_get);
+        // var_dump($q_first);
+
+        // dd($e_mail, $q_get, $q_first, $c_test);
+        return view('admin.owners.index', compact('e_all', 'q_get'));
     }
 
     /**
